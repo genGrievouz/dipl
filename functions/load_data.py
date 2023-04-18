@@ -18,7 +18,7 @@ def load_file(name) -> dict:
 
 
 def load_data() -> dict:
-    data_path = os.getcwd() + '\data'
+    data_path = os.getcwd() + '\data\dataset_1'
     data = {}
     for file in os.listdir(data_path):
         if ".mat" in file:
@@ -99,3 +99,10 @@ def remove_negative_values(x):
         if x[i] < 0:
             x[i] = 0.1
     return x
+
+
+def find_rising_point(signal):
+    differences = np.diff(signal)
+    index = np.argmax(differences > 0)
+    rising_point = signal[index]
+    print(f'Signal starts rising at index {index}, value {rising_point}')
