@@ -7,7 +7,7 @@ from scipy import signal
 
 
 def load_file(name) -> dict:
-    data_path = os.getcwd() + '\data'
+    data_path = os.getcwd() + '\data\dataset_1'
     data_f = {}
     data = pymatreader.read_mat(data_path + "\\" + name)
     signal = data['tissue'][0]

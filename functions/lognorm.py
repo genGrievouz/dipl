@@ -5,8 +5,6 @@ import math
 from scipy.stats import lognorm
 from scipy.optimize import curve_fit
 
-from functions.load_data import normalize, remove_negative_values
-
 
 def model(i, auc, mean, std):
     return [(auc / (x * std * np.sqrt(2 * np.pi))) * np.exp(((np.log(x) - mean) ** 2) / (2 * std ** 2)) for x in i]

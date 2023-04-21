@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def cuckoo_search(objective_function, dimension, lb, ub, pa=0.25, nest_count=100, max_iter=1000):
+def cuckoo_search(objective_function, dimension, lb, ub, pa=0.25, nest_count=25, max_iter=100):
     """
     lb - lower bound
     ub - upper bound

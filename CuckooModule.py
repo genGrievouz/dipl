@@ -1,7 +1,11 @@
+import os
+
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+from pymatreader import pymatreader
 
+from dipl.functions.gamma import GAMMA
 from dipl.functions.ldrw import LDRW
 from dipl.functions.load_data import load_data, remove_negative_values, preprocessing, normalize
 
@@ -64,7 +68,7 @@ def get_params_for_cuckoo():
         # Keep best nests and discard rest
         return sorted_nests[:num_keep]
 
-    def cuckoo_search_gamma(x, auc, pop_size=10, num_iterations=50, num_abandoned=3, num_keep=10, beta=1.5):
+    def cuckoo_search_gamma(x, auc, pop_size=10, num_iterations=1000, num_abandoned=3, num_keep=10, beta=1.5):
         # Initialize population
         param_range = [0.1, 10.0, 0.1, 10.0]
         nests = initialize_nests(pop_size, param_range)
@@ -101,26 +105,45 @@ def get_params_for_cuckoo():
         # Return best solution
         return alpha, beta
 
-    auc = 0.9
+    auc = 1
     data = load_data()
     k = 'exp13_roivelke_inp_tis_111007'
-    x = normalize(remove_negative_values(preprocessing((data[k]['signal']))))
+    x = remove_negative_values(preprocessing((data[k]['signal'])))
     threshold = 0.03
     removed_indices = [index for index in range(len(x)) if x[index] < threshold]
     x = [i for i in x if i > threshold]
     time = data[k]['time']
     time = [time[i] for i in range(len(time)) if i not in removed_indices]
-    alpha, beta = cuckoo_search_gamma(x, auc, pop_size=10, num_iterations=50, num_abandoned=3, num_keep=10, beta=1.5)
+    alpha, beta = cuckoo_search_gamma(x, auc, pop_size=10, num_iterations=1000, num_abandoned=3, num_keep=10, beta=1.5)
 
-    ldrw = LDRW(x, time)
-    fit_ldrw = ldrw.fit
+    # ldrw = LDRW(x, time)
+    # fit_ldrw = ldrw.fit
 
+    def load_file_n(self, name):
+        data_path = os.getcwd() + '\data\dataset_2'
+        data = pymatreader.read_mat(data_path + "\\" + name)
+        signal = []
+        dataset = data['data1']
 
+        for i in range(0, len(dataset)):
+            x = np.floor(dataset[i].shape[1] / 2)
+            y = np.floor(dataset[i].shape[0] / 2)
+            signal.append(dataset[i][int(y)][int(x)])
+
+        x = signal
+        time = data['info']["acq"]['TimeStamps']
+        ts = data['info']['acq']["Ts"]
+        return x, time
+
+    x,t = load_file_n(name='per02_2_4_trig_DR60_inp_con_mreg_121113.mat')
+
+    gamma = GAMMA(x, time, auc, beta, alpha)
+    fit_gamma = gamma.fit
 
     plt.figure()
     plt.plot(time, x, 'o', label='data')
     # plt.plot(time, fit_lognormal, '-', label='lognormal')
-    # plt.plot(time, fit_gamma, '-', label='gamma variate')
+    plt.plot(time, fit_gamma, '-', label='gamma variate')
     # plt.plot(time, fit_ldrw, '-', label='ldrw')
     # plt.plot(time, fit_fpt, '-', label='fpt')
     # plt.plot(time, fit_lagged, '-', label='lagged normal')

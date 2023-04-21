@@ -1,11 +1,11 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 from scipy.optimize import curve_fit
 
 
 def ldrw_model(signal, auc, lamd, mu):
-    return [auc * (np.exp(lamd) / lamd) * np.sqrt((mu * lamd) / (x * 2 * np.pi)) * np.exp(-0.5 * lamd * ((mu / x) + (x / mu))) for x in signal]
+    return [auc * (np.exp(lamd) / lamd) * np.sqrt((mu * lamd) / (x * 2 * np.pi)) * np.exp(
+        -0.5 * lamd * ((mu / x) + (x / mu))) for x in signal]
 
 
 class LDRW:
