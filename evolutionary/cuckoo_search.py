@@ -1,55 +1,85 @@
+import os
+
+from math import gamma, sin, pi
 import numpy as np
+from matplotlib import pyplot as plt
+from pymatreader import pymatreader
+from scipy.optimize import curve_fit
+from dipl.functions.gamma import gamma_model
 
 
-def cuckoo_search(objective_function, dimension, lb, ub, pa=0.25, nest_count=25, max_iter=100):
+def objective_function_gamma(params, signal, y):
+    auc, alpha, beta = params
+    y_pred = gamma_model(signal, auc, beta, alpha)
+    return np.mean((y - y_pred) ** 2)
+
+
+def cuckoo_search(objective_function, lb, ub, dimension, n, max_iter):
     """
-    lb - lower bound
-    ub - upper bound
-    pa - probability of abandoning a nest
-    nest_count - number of nests
-    max_iter - number of iterations
+    Cuckoo Search Algorithm
+    :param objective_function: The function to optimize
+    :param lb: Lower bound of the search space
+    :param ub: Upper bound of the search space
+    :param dimension: The number of dimensions in the search space
+    :param n: The number of nests (population size)
+    :param max_iter: The maximum number of iterations
+    :return: The best solution found
     """
-    # Generate initial solutions
-    nests = np.random.uniform(low=lb, high=ub, size=(nest_count, dimension))
+    # Initialize nests randomly
+    nests = np.random.uniform(lb, ub, (n, dimension))
+
+    # Get the fitness of each nest
     fitness = np.apply_along_axis(objective_function, 1, nests)
 
     # Find the best nest
     fmin, best_nest = min(zip(fitness, nests))
 
+    # Initialize parameters
+    pa = 0.25  # Discovery rate of alien eggs/solutions
+    alpha = 1.0  # Step size scaling factor
+
     # Start iterations
     for _ in range(max_iter):
-        # Generate new solutions by cuckoo
+        # Generate new solutions (but keep the current best)
         new_nests = np.empty_like(nests)
-        for i in range(nest_count):
-            new_nests[i] = nests[i] + levy_flight(dimension)
-            new_nests[i] = np.clip(new_nests[i], lb, ub)
+        for i in range(n):
+            step_size = alpha * levy(dimension)
+            new_nests[i] = nests[i] + step_size * (nests[i] - best_nest)
 
-        # Evaluate new solutions
+        # Apply bounds to new solutions
+        np.clip(new_nests, lb, ub, out=new_nests)
+
+        # Evaluate new solutions and update nests
         new_fitness = np.apply_along_axis(objective_function, 1, new_nests)
+        nests[fitness > new_fitness] = new_nests[fitness > new_fitness]
+        fitness[fitness > new_fitness] = new_fitness[fitness > new_fitness]
 
-        # Choose better solutions
-        better_nests = new_fitness < fitness
-        nests[better_nests] = new_nests[better_nests]
-        fitness[better_nests] = new_fitness[better_nests]
+        # Find the current best nest and its fitness
+        current_fmin, current_best_nest = min(zip(fitness, nests))
 
-        # Find the current best
-        current_fmin, current_best = min(zip(fitness, nests))
-        if current_fmin < fmin:
+        # Update the overall best nest if necessary
+        if fmin > current_fmin:
             fmin = current_fmin
-            best_nest = current_best
+            best_nest = current_best_nest
 
-        # Abandon some nests
-        abandoned = np.random.rand(nest_count) < pa
-        nests[abandoned] = np.random.uniform(lb, ub, (abandoned.sum(), dimension))
+        # Abandon some nests and build new ones
+        abandoned_nests = np.random.rand(n) < pa
+        nests[abandoned_nests] = np.random.uniform(lb, ub, (abandoned_nests.sum(), dimension))
 
-    return fmin, best_nest
+    return best_nest
 
 
-def levy_flight(dimension):
-    sigma1 = (np.math.gamma(1 + 1.5) * np.sin(np.pi * 1.5 / 2) / (
-                np.math.gamma((1 + 1.5) / 2) * 1.5 * 2 ** ((1.5 - 1) / 2))) ** (1 / 1.5)
-    sigma2 = 1
-    u = np.random.normal(0, sigma1, dimension)
-    v = np.random.normal(0, sigma2, dimension)
-    step = u / abs(v) ** (1 / 1.5)
-    return 0.01 * step
+def levy(dimension):
+    """
+    Generate step sizes for Cuckoo Search using Levy flights.
+    :param dimension: The number of dimensions in the search space.
+    :return: A vector of step sizes.
+    """
+    beta = 3 / 2
+    sigma = (gamma(1 + beta) * sin(pi * beta / 2) / (gamma((1 + beta) / 2) * beta * 2 ** ((beta - 1) / 2))) ** (
+            1 / beta)
+
+    u = np.random.normal(0, sigma, dimension)
+    v = np.random.normal(0, 1, dimension)
+
+    return u / abs(v) ** (1 / beta)

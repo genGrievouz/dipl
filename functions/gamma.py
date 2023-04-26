@@ -28,10 +28,7 @@ class GAMMA:
     def __init__(self, x, time, auc=None, beta=None, alpha=None):
         if auc is None and beta is None and alpha is None:
             parameters, covariance = curve_fit(gamma_model, time, x, p0=[1, 1, 1], maxfev=200000)
+            print(parameters)
             self.fit = gamma_model(time, parameters[0], parameters[1], parameters[2])
         if auc is not None and beta is not None and alpha is not None:
-            self.fit = gamma_model(x, auc, beta, alpha)
-        # param = scipy.stats.gamma.fit(x)
-        # # #x = normalize(x)
-        # # xlin = np.linspace(0,np.max(x),len(x))
-        # self.fit = scipy.stats.gamma.pdf(x, param[0], loc=param[1], scale=param[2])
+            self.fit = gamma_model(time, auc, beta, alpha)

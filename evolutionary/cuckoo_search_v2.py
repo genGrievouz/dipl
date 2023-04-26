@@ -1,7 +1,25 @@
 import numpy as np
+import math
 
 
-def cuckoo_search(objective_function, lower_bound, upper_bound, dimension, n_nests=25, n_iterations=100, pa=0.25):
+def cuckoo_search(signal: list,
+                  time: list,
+                  ts: float,
+                  param_ranges: list
+                  ):
+    def objective_function(params):
+        auc, alpha, beta = params
+        output = [(auc * (x ** alpha) * np.exp(-1 * x / beta)) / (beta ** (alpha + 1) * math.gamma(alpha + 1)) for x in
+                  signal]
+        return np.sum(np.abs(output))
+
+    n_nests = 100
+    n_iterations = 1000
+    pa = 0.25
+    dimension = 3
+    lower_bound = [p[0] for p in param_ranges]
+    upper_bound = [p[1] for p in param_ranges]
+
     # Initialize nests
     nests = np.random.uniform(lower_bound, upper_bound, (n_nests, dimension))
 
@@ -40,5 +58,7 @@ def cuckoo_search(objective_function, lower_bound, upper_bound, dimension, n_nes
         # Update the global best nest if necessary
         if current_fmin < fmin:
             fmin, best_nest = current_fmin, current_best_nest
+
+    print(fmin, best_nest)
 
     return fmin, best_nest

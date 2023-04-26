@@ -1,37 +1,87 @@
-# define the ant colony optimization algorithm
+import random
 import numpy as np
+import math
 
 
-def ant_colony_optimization(objective_func, lb, ub, n_ants=10, n_iterations=1000):
-    # initialize the pheromone matrix
-    pheromone = np.ones((n_ants, len(lb)))
+def ant_colony_optimization(
+        signal: list,
+        time: list,
+        ts: float,
+        param_range,
+        num_ants=10,
+        num_iterations=100,
+        evaporation_rate=0.1,
+        alpha=1, beta=2
+):
+    def objective_function(params):
+        auc, alpha, beta = params
+        output = [(auc * (x ** alpha) * np.exp(-1 * x / beta)) / (beta ** (alpha + 1) * math.gamma(alpha + 1)) for x in signal]
+        return np.sum(np.abs(output))
 
-    # initialize the best solution and its fitness
-    best_solution = None
-    best_fitness = np.inf
+    """
+    Ant Colony Optimization algorithm for finding the optimal parameters for a given objective function.
 
-    # main loop
-    for _ in range(n_iterations):
-        # initialize the solutions and their fitnesses
-        solutions = np.zeros((n_ants, len(lb)))
-        fitnesses = np.zeros(n_ants)
+    Parameters:
+    obj_func (function): The objective function to optimize.
+    param_range (list of tuples): The range of candidate parameters for the model.
+    num_ants (int): The number of ants in the colony.
+    num_iterations (int): The number of iterations to run the algorithm.
+    evaporation_rate (float): The rate at which pheromone evaporates.
+    alpha (float): The importance of the pheromone trail in choosing the next parameter.
+    beta (float): The importance of the fitness value in choosing the next parameter.
 
-        # for each ant
-        for i in range(n_ants):
-            # construct a solution
-            for j in range(len(lb)):
-                solutions[i, j] = lb[j] + (ub[j] - lb[j]) * np.random.rand()
+    Returns:
+    best_params (dict): The best parameters found by the algorithm.
+    """
 
-            # evaluate the fitness of the solution
-            fitnesses[i] = objective_func(solutions[i])
+    # Initialize the pheromone trail
+    num_params = len(param_range)
+    pheromone = np.ones(num_params) / num_params
 
-            # update the best solution and its fitness
-            if fitnesses[i] < best_fitness:
-                best_solution = solutions[i]
-                best_fitness = fitnesses[i]
+    # Initialize the best parameters and fitness value
+    best_params = {}
+    best_fitness = float('-inf')
 
-        # update the pheromone matrix
-        pheromone *= 0.9
-        pheromone[np.argmin(fitnesses)] += 0.1
+    # Initialize the colony of ants
+    ants = []
+    for i in range(num_ants):
+        ant_params = {}
+        for j in range(num_params):
+            param_min, param_max = param_range[j]
+            ant_params[j] = random.uniform(param_min, param_max)
+        ants.append(ant_params)
 
-    return best_solution
+    # Run the algorithm for the specified number of iterations
+    for i in range(num_iterations):
+        # Evaluate the fitness of each ant's parameters
+        fitness_values = []
+        for ant_params in ants:
+            print(ant_params)
+            fitness = objective_function(**ant_params)
+            fitness_values.append(fitness)
+
+            # Update the best parameters and fitness value
+            if fitness > best_fitness:
+                best_params = ant_params
+                best_fitness = fitness
+
+        # Update the pheromone trail
+        pheromone *= (1 - evaporation_rate)
+        for ant_params, fitness in zip(ants, fitness_values):
+            for j in range(num_params):
+                param_value = ant_params[j]
+                pheromone[j] += evaporation_rate * fitness / objective_function(**best_params) * (param_value == best_params[j])
+
+        # Choose the next set of candidate parameters
+        for ant_params in ants:
+            candidate_params = {}
+            for j in range(num_params):
+                param_min, param_max = param_range[j]
+                param_probs = np.zeros(param_max - param_min + 1)
+                for k in range(param_min, param_max + 1):
+                    param_probs[k - param_min] = pheromone[j] ** alpha * (1 / abs(ant_params[j] - k)) ** beta
+                param_probs /= param_probs.sum()
+                candidate_params[j] = np.random.choice(np.arange(param_min, param_max + 1), p=param_probs)
+            ant_params.update(candidate_params)
+
+    return best_params
