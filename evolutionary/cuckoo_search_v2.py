@@ -1,5 +1,5 @@
 import numpy as np
-import math
+from scipy.special import gamma
 
 
 def cuckoo_search(signal: list,
@@ -9,14 +9,14 @@ def cuckoo_search(signal: list,
                   ):
     def objective_function(params):
         auc, alpha, beta = params
-        output = [(auc * (x ** alpha) * np.exp(-1 * x / beta)) / (beta ** (alpha + 1) * math.gamma(alpha + 1)) for x in
+        output = [(auc * (x ** alpha) * np.exp(-1 * x / beta)) / (beta ** (alpha + 1) * gamma(alpha + 1)) for x in
                   signal]
         return np.sum(np.abs(output))
 
-    n_nests = 100
-    n_iterations = 1000
-    pa = 0.25
-    dimension = 3
+    n_nests = 25
+    n_iterations = 100
+    pa = 1.0
+    dimension = len(param_ranges)
     lower_bound = [p[0] for p in param_ranges]
     upper_bound = [p[1] for p in param_ranges]
 

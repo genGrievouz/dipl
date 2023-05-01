@@ -1,9 +1,12 @@
 import numpy as np
-import math
-from array import array
+from scipy.special import gamma
 
 
-def abc(signal: list, time: list, ts: float):
+def abc(signal: list,
+        time: list,
+        ts: float,
+        param_ranges: list
+        ):
     """
     Artificial Bee Colony algorithm.
 
@@ -11,23 +14,21 @@ def abc(signal: list, time: list, ts: float):
     :param bounds: The bounds of the search space.
     :param n_bees: The number of bees in the colony.
     :param max_iter: The maximum number of iterations.
-    :param max_trials: The maximum number of trials before a food source is abandoned.
+    :param max_trials: The maximum number o f trials before a food source is abandoned.
     :return: The best solution found by the algorithm.
     """
     def objective_function(params):
         auc, alpha, beta = params
-        output = [(auc * (x ** alpha) * np.exp(-1 * x / beta)) / (beta ** (alpha + 1) * math.gamma(alpha + 1)) for x in
+        output = [(auc * (x ** alpha) * np.exp(-1 * x / beta)) / (beta ** (alpha + 1) * gamma(alpha + 1)) for x in
                   signal]
         return np.sum(np.abs(output))
 
-    bounds = ((21000, 23000), (40, 50), (0.7, 1))
     n_bees = 15
     max_iter = 100
     max_trials = 10
-
-    n_dim = 3
-    lb = [b[0] for b in bounds]
-    ub = [b[1] for b in bounds]
+    n_dim = len(param_ranges)
+    lb = [b[0] for b in param_ranges]
+    ub = [b[1] for b in param_ranges]
     # initialize the population
     population = np.random.uniform(lb, ub, (n_bees, n_dim))
 

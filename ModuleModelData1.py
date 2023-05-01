@@ -23,7 +23,6 @@ class ModuleModelData1:
             threshold = 0.03
             removed_indices = [index for index in range(len(x)) if x[index] < threshold]
             x = [i for i in x if i > threshold]
-            print("x: ", x)
             time = data[k]['time']
             time = [time[i] for i in range(len(time)) if i not in removed_indices]
 

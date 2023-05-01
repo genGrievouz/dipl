@@ -50,11 +50,13 @@ def plot_result_algos(
         params_abc: list or None,
         params_pso: list or None,
         params_ant: list or None,
+        params_fir: list or None
 ):
     global fit_gamma_algo_cuc
     global fit_gamma_algo_abc
     global fit_gamma_algo_pso
     global fit_gamma_algo_ant
+    global fit_gamma_algo_fir
 
     if model == "gamma":
         gamma = GAMMA(x,
@@ -70,7 +72,7 @@ def plot_result_algos(
                                    alpha=params_cuckoo[2]
                                    )
             fit_gamma_algo_cuc = gamma_algo_cuc.fit
-            print("calculated cuckoo")
+            print("calc cuckoo")
 
         if params_abc is not None:
             gamma_algo_abc = GAMMA(x,
@@ -102,9 +104,19 @@ def plot_result_algos(
             fit_gamma_algo_ant = gamma_algo_ant.fit
             print("calc ant")
 
+        if params_fir is not None:
+            gamma_algo_fir = GAMMA(x,
+                                   time,
+                                   auc=params_fir[0],
+                                   beta=params_fir[1],
+                                   alpha=params_fir[2]
+                                   )
+            fit_gamma_algo_fir = gamma_algo_fir.fit
+            print("calc fir")
+
         plt.figure()
         plt.plot(time, x, 'o', label='data')
-        plt.plot(time, fit_gamma, '-', label=fig_name)
+        plt.plot(time, fit_gamma, '-', label=fig_name + "scipi")
         if params_cuckoo is not None:
             plt.plot(time, fit_gamma_algo_cuc, '-', label=fig_name + " cuckoo")
         if params_abc is not None:
@@ -113,6 +125,8 @@ def plot_result_algos(
             plt.plot(time, fit_gamma_algo_pso, '-', label=fig_name + " pso")
         if params_ant is not None:
             plt.plot(time, fit_gamma_algo_ant, '-', label=fig_name + " ant")
+        if params_fir is not None:
+            plt.plot(time, fit_gamma_algo_fir, '-', label=fig_name + " fir")
         plt.legend(loc='upper right')
         plt.ylabel('Intensity')
         plt.xlabel('Time [s]')

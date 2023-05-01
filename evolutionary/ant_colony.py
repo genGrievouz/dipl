@@ -1,6 +1,6 @@
 import random
 import numpy as np
-import math
+from scipy.special import gamma
 
 
 def ant_colony_optimization(
@@ -13,16 +13,17 @@ def ant_colony_optimization(
         evaporation_rate=0.1,
         alpha=1, beta=2
 ):
-    def objective_function(params):
-        auc, alpha, beta = params
-        output = [(auc * (x ** alpha) * np.exp(-1 * x / beta)) / (beta ** (alpha + 1) * math.gamma(alpha + 1)) for x in signal]
+
+    def objective_function(auc=None, alpha=None, beta=None, signal=None):
+        output = [(auc * (x ** alpha) * np.exp(-1 * x / beta)) / (beta ** (alpha + 1) * gamma(alpha + 1)) for x in
+                  signal]
         return np.sum(np.abs(output))
 
     """
     Ant Colony Optimization algorithm for finding the optimal parameters for a given objective function.
 
     Parameters:
-    obj_func (function): The objective function to optimize.
+    objective_function (function): The objective function to optimize.
     param_range (list of tuples): The range of candidate parameters for the model.
     num_ants (int): The number of ants in the colony.
     num_iterations (int): The number of iterations to run the algorithm.
@@ -34,7 +35,6 @@ def ant_colony_optimization(
     best_params (dict): The best parameters found by the algorithm.
     """
 
-    # Initialize the pheromone trail
     num_params = len(param_range)
     pheromone = np.ones(num_params) / num_params
 
@@ -53,11 +53,9 @@ def ant_colony_optimization(
 
     # Run the algorithm for the specified number of iterations
     for i in range(num_iterations):
-        # Evaluate the fitness of each ant's parameters
         fitness_values = []
         for ant_params in ants:
-            print(ant_params)
-            fitness = objective_function(**ant_params)
+            fitness = objective_function(auc=ant_params[0], alpha=ant_params[1], beta=ant_params[2], signal=signal)
             fitness_values.append(fitness)
 
             # Update the best parameters and fitness value
@@ -70,18 +68,24 @@ def ant_colony_optimization(
         for ant_params, fitness in zip(ants, fitness_values):
             for j in range(num_params):
                 param_value = ant_params[j]
-                pheromone[j] += evaporation_rate * fitness / objective_function(**best_params) * (param_value == best_params[j])
+                pheromone[j] += evaporation_rate * fitness / objective_function(auc=best_params[0],
+                                                                                alpha=best_params[1],
+                                                                                beta=best_params[2], signal=signal) * (
+                                        param_value == best_params[j])
 
         # Choose the next set of candidate parameters
         for ant_params in ants:
             candidate_params = {}
             for j in range(num_params):
                 param_min, param_max = param_range[j]
+                param_min = int(param_min)
+                param_max = int(param_max)
                 param_probs = np.zeros(param_max - param_min + 1)
                 for k in range(param_min, param_max + 1):
                     param_probs[k - param_min] = pheromone[j] ** alpha * (1 / abs(ant_params[j] - k)) ** beta
-                param_probs /= param_probs.sum()
-                candidate_params[j] = np.random.choice(np.arange(param_min, param_max + 1), p=param_probs)
+                param_probs_sum = param_probs.sum()
+                candidate_params[str(j)] = np.random.choice(np.arange(param_min, param_max + 1),
+                                                            p=param_probs / param_probs_sum)
             ant_params.update(candidate_params)
 
     return best_params
