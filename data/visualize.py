@@ -116,7 +116,7 @@ def plot_result_algos(
 
         plt.figure()
         plt.plot(time, x, 'o', label='data')
-        plt.plot(time, fit_gamma, '-', label=fig_name + "scipi")
+        plt.plot(time, fit_gamma, '-', label=fig_name + " scipi")
         if params_cuckoo is not None:
             plt.plot(time, fit_gamma_algo_cuc, '-', label=fig_name + " cuckoo")
         if params_abc is not None:
