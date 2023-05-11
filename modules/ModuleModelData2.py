@@ -28,8 +28,10 @@ class ModuleModelData2:
             signal.append(dataset[i][int(y)][int(x)])
 
         x = signal
+        threshold = min(x) + 0.1
+        x = [i - threshold for i in x]
         time = data['info']["acq"]['TimeStamps']
-        ts = data['info']['acq']["Ts"]
+        # ts = data['info']['acq']["Ts"]
 
         ldrw = LDRW(x, time)
         fit_ldrw = ldrw.fit
@@ -40,8 +42,9 @@ class ModuleModelData2:
         fpt = FPT(x, time)
         fit_fpt = fpt.fit
 
-        lognorm = LOGNORM(x, time, ts)
+        lognorm = LOGNORM(x, time)
         fit_lognormal = lognorm.fit
+        print(fit_lognormal)
 
         lagged = LAGG(x, time)
         fit_lagged = lagged.fit

@@ -15,6 +15,6 @@ class FPT:
         if auc is None and mu is None and lam is None:
             parameters, covariance = curve_fit(fpt_model, time, x, p0=[1, 1, 1], maxfev=200000)
             self.fit = fpt_model(time, parameters[0], parameters[1], parameters[2])
-            self.params = parameters
+            self.params_range = parameters
         elif auc is not None and mu is not None and lam is not None:
             self.fit = fpt_model(time, auc, mu, lam)

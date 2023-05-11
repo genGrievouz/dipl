@@ -18,4 +18,4 @@ def pso_algorithm(signal: list,
         swarmsize=10,
     )
 
-    return best_params
+    return best_params[0]

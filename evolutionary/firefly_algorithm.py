@@ -1,15 +1,11 @@
-import random
 import math
 import numpy as np
 
 from dipl.data.search_space import get_objective_function_and_params
-from dipl.functions.gamma import gamma_model
 
-#TODO
 
 def firefly_algorithm(signal,
                       time,
-                      ts,
                       objective_function_type,
                       num_fireflies=10,
                       max_iterations=100,
@@ -46,7 +42,7 @@ def firefly_algorithm(signal,
 
     # Evaluate the initial light intensity of each firefly
     for i in range(num_fireflies):
-        light_intensity[i] = objective_function(fireflies[i])
+        light_intensity[i] = objective_function(fireflies[i], signal)
 
     # Initialize the best firefly and its light intensity
     best_firefly = np.zeros(num_parameters)
@@ -69,7 +65,7 @@ def firefly_algorithm(signal,
                     # Enforce parameter bounds
                     fireflies[i] = np.maximum(fireflies[i], lower_bounds)
                     fireflies[i] = np.minimum(fireflies[i], upper_bounds)
-                    light_intensity[i] = objective_function(fireflies[i])
+                    light_intensity[i] = objective_function(fireflies[i], signal)
 
         # Update the best firefly and its light intensity
         index = np.argmin(light_intensity)
@@ -77,4 +73,5 @@ def firefly_algorithm(signal,
             best_firefly = fireflies[index]
             best_light_intensity = light_intensity[index]
 
-    return best_firefly, best_light_intensity
+    # return best_firefly, best_light_intensity
+    return best_firefly

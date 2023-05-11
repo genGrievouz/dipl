@@ -19,8 +19,9 @@ class ModuleModelData1:
 
         for k, v in data.items():
 
-            x = normalize(remove_negative_values(preprocessing((data[k]['signal']))))
-            threshold = 0.03
+            # x = normalize(remove_negative_values(preprocessing((data[k]['signal']))))
+            x = remove_negative_values(preprocessing((data[k]['signal'])))
+            threshold = min(x) + 0.1
             removed_indices = [index for index in range(len(x)) if x[index] < threshold]
             x = [i for i in x if i > threshold]
             time = data[k]['time']
@@ -37,7 +38,7 @@ class ModuleModelData1:
             fpt = FPT(x, time)
             fit_fpt = fpt.fit
 
-            lognorm = LOGNORM(x, time, ts)
+            lognorm = LOGNORM(x, time)
             fit_lognormal = lognorm.fit
 
             lagged = LAGG(x, time)

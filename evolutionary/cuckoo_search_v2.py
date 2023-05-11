@@ -10,11 +10,11 @@ def cuckoo_search(signal: list,
 
     param_ranges, objective_function = get_objective_function_and_params(signal, time, objective_function_type)
 
-
     n_nests = 25
     n_iterations = 100
     pa = 1.0
     dimension = len(param_ranges)
+
     lower_bound = [p[0] for p in param_ranges]
     upper_bound = [p[1] for p in param_ranges]
 
@@ -57,4 +57,5 @@ def cuckoo_search(signal: list,
         if current_fmin < fmin:
             fmin, best_nest = current_fmin, current_best_nest
 
+    print(fmin)
     return fmin, best_nest

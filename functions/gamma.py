@@ -1,17 +1,15 @@
 import numpy as np
-import math
-from scipy.special import gamma
 from scipy.optimize import curve_fit
-from scipy.stats import gamma
+from scipy.special import gamma
 #TODO save with zero np.devide
 
 
 def gamma_model(signal, auc, beta, alpha):
-    return [(auc * (x ** alpha) * np.exp(-1 * x / beta)) / (beta ** (alpha + 1) * math.gamma(alpha + 1)) for x in
+    return [np.divide((auc * (x ** alpha) * np.exp(-1 * np.divide(x, beta))), (beta ** (alpha + 1) * gamma(alpha + 1))) for x in
             signal]
 
-
 class GAMMA:
+
     fit: list
     params_range: list
 

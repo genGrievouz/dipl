@@ -24,6 +24,7 @@ def objective_function_lognormal(params, signal):
     output = lognorm_model(signal, auc, mean, std)
     return np.sum(np.abs(output))
 
+
 def objective_function_lagged(params, signal):
     auc, lam, mu, sigm = params
     output = laggednormal_model(signal, auc, lam, mu, sigm)
@@ -35,6 +36,25 @@ def objective_function_ldrw(params, signal):
     output = ldrw_model(signal, auc, lamd, mu)
     return np.sum(np.abs(output))
 
+
+def to_model(signal, time, model, params):
+    if model == "gamma":
+        print(params)
+        gamma = GAMMA(signal, time, params[0], params[1], params[2])
+        print(gamma.fit)
+        return gamma.fit
+    if model == "fpt":
+        ftp = FPT(signal, time, params[0], params[1], params[2])
+        return ftp.fit
+    if model == "lagged":
+        lagg = LAGG(signal, time, params[0], params[1], params[2], params[3])
+        return lagg.fit
+    if model == "lognormal":
+        lognormal = LOGNORM(signal, time, params[0], params[1], params[2])
+        return lognormal.fit
+    if model == "ldrw":
+        ldrw = LDRW(signal, time, params[0], params[1], params[2])
+        return ldrw.fit
 
 def get_objective_function_and_params(signal, time, objective_function_type):
 

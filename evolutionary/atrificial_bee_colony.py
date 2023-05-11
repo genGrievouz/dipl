@@ -24,7 +24,7 @@ def abc(signal: list,
     n_dim = len(param_ranges)
     lb = [b[0] for b in param_ranges]
     ub = [b[1] for b in param_ranges]
-    # initialize the population
+
     population = np.random.uniform(lb, ub, (n_bees, n_dim))
 
     # evaluate the population
