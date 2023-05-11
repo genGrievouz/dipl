@@ -22,7 +22,7 @@ def cuckoo_search(signal: list,
     nests = np.random.uniform(lower_bound, upper_bound, (n_nests, dimension))
 
     # Evaluate nests
-    nest_fitness = np.apply_along_axis(objective_function, 1, nests)
+    nest_fitness = np.apply_along_axis(objective_function, 1, nests, signal)
 
     # Find the current best nest
     fmin, best_nest = min(nest_fitness), nests[nest_fitness.argmin()]
@@ -34,7 +34,7 @@ def cuckoo_search(signal: list,
         new_solution = cuckoo + np.random.normal(0, 1, dimension) * (best_nest - cuckoo)
 
         # Evaluate the new solution
-        new_solution_fitness = objective_function(new_solution)
+        new_solution_fitness = objective_function(new_solution, signal)
 
         # Choose a nest at random and compare its fitness to that of the new solution
         j = np.random.randint(n_nests)
@@ -48,7 +48,7 @@ def cuckoo_search(signal: list,
         nests[worst_nests] = np.random.uniform(lower_bound, upper_bound, (n_abandoned, dimension))
 
         # Evaluate the new nests
-        nest_fitness[worst_nests] = np.apply_along_axis(objective_function, 1, nests[worst_nests])
+        nest_fitness[worst_nests] = np.apply_along_axis(objective_function, 1, nests[worst_nests], signal)
 
         # Find the current best nest
         current_fmin, current_best_nest = min(nest_fitness), nests[nest_fitness.argmin()]
@@ -57,5 +57,4 @@ def cuckoo_search(signal: list,
         if current_fmin < fmin:
             fmin, best_nest = current_fmin, current_best_nest
 
-    print(fmin)
-    return fmin, best_nest
+    return best_nest

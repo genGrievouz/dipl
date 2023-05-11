@@ -18,6 +18,8 @@ def dataset_2_load_file_n(name):
         signal.append(dataset[i][int(y)][int(x)])
 
     x = signal
+    min_x = min(x) + 0.1
+    # x = [i - min_x for i in x]
     time = data['info']["acq"]['TimeStamps']
     ts = data['info']['acq']["Ts"]
     return x, time, ts

@@ -167,7 +167,7 @@ def abc(
     population += lb
 
     # Evaluate population
-    fitness = np.apply_along_axis(objective_function, 1, population)
+    fitness = np.apply_along_axis(objective_function, 1, population, signal)
 
     # Determine best solution
     min_idx = np.argmin(fitness)
@@ -197,7 +197,7 @@ def abc(
                                                     ub[param_to_modify])
 
             # Evaluate new solution
-            new_val = objective_function(new_solution)
+            new_val = objective_function(new_solution, signal)
 
             # Greedy selection
             if new_val < fitness[i]:
@@ -230,7 +230,7 @@ def abc(
                                                     ub[param_to_modify])
 
             # Evaluate new solution
-            new_val = objective_function(new_solution)
+            new_val = objective_function(new_solution, signal)
 
             # Greedy selection
             if new_val < fitness[food_source_ix]:

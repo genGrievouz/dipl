@@ -1,13 +1,23 @@
 import numpy as np
 
+from dipl.data.search_space import get_objective_function_and_params
+
 
 class MSO:
-    def __init__(self, fitness_func, num_variables, lb, ub, num_monkeys=30, num_spiders=10, spider_radius=0.2,
+    def __init__(self,
+                 signal,
+                 time,
+                 objective_function_type,
+                 num_monkeys=30,
+                 num_spiders=10,
+                 spider_radius=0.2,
                  alpha=0.1, gamma=0.1, beta=2):
-        self.fitness_func = fitness_func
-        self.num_variables = num_variables
-        self.lb = lb
-        self.ub = ub
+
+        self.signal = signal
+        self.params, self.fitness_func = get_objective_function_and_params(signal, time, objective_function_type)
+        self.num_variables = len(self.params)
+        self.lb = np.array([p[0] for p in self.params])
+        self.ub = np.array([p[1] for p in self.params])
         self.num_monkeys = num_monkeys
         self.num_spiders = num_spiders
         self.spider_radius = spider_radius
@@ -21,7 +31,7 @@ class MSO:
         spiders = np.zeros((self.num_spiders, self.num_variables))
 
         # Evaluate initial fitness
-        monkey_fitness = np.apply_along_axis(self.fitness_func, 1, monkeys)
+        monkey_fitness = np.apply_along_axis(self.fitness_func, 1, monkeys, self.signal)
 
         # Main loop
         for i in range(max_iter):
@@ -40,7 +50,7 @@ class MSO:
                 spiders[j] = center + self.spider_radius * np.random.uniform(low=-1, high=1, size=self.num_variables)
 
             # Evaluate spider fitness
-            spider_fitness = np.apply_along_axis(self.fitness_func, 1, spiders)
+            spider_fitness = np.apply_along_axis(self.fitness_func, 1, spiders, self.signal)
 
             # Update monkey positions
             for j in range(self.num_monkeys):
@@ -62,7 +72,7 @@ class MSO:
                 monkeys[j] = np.clip(monkeys[j], self.lb, self.ub)
 
             # Evaluate new fitness
-            monkey_fitness = np.apply_along_axis(self.fitness_func, 1, monkeys)
+            monkey_fitness = np.apply_along_axis(self.fitness_func, 1, monkeys, self.signal)
 
             # Update best monkey and fitness
             if monkey_fitness[0] < best_fitness:
@@ -72,5 +82,5 @@ class MSO:
             # Print progress
             print(f"Iteration {i + 1}/{max_iter}: Best fitness = {best_fitness}")
 
-        print(best_monkey)
-        return best_monkey, best_fitness
+        return best_monkey
+        # return best_monkey, best_fitness

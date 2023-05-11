@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.special import gamma
-#TODO save with zero np.devide
 
 
 def gamma_model(signal, auc, beta, alpha):

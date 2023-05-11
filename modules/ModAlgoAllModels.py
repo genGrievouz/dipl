@@ -1,4 +1,5 @@
 from dipl.data.search_space import to_model
+from dipl.evolutionary.MSO import MSO
 from dipl.evolutionary.ant_colony import ant_colony_optimization
 from dipl.evolutionary.atrificial_bee_colony import abc
 from dipl.evolutionary.cuckoo_search_v2 import cuckoo_search
@@ -14,16 +15,17 @@ class ModAlgoAllModels:
     time: list
     algorithm: str
     outputs: dict = {}
-    models: list = ["gamma", "ldrw", "fpt", "lognormal", "lagged"]
+    models: list = ["gamma", "ldrw", "fpt", "lagged"]
 
     def run(self):
         if self.algorithm == "cuckoo search":
             for model in self.models:
                 print("Running " + model + " model")
-                out = cuckoo_search(signal=self.signal,
+                params = cuckoo_search(signal=self.signal,
                                     time=self.time,
                                     objective_function_type=model
                                     )
+                out = to_model(signal=self.signal, time=self.time, model=model, params=params)
                 self.outputs[model] = out
 
         if self.algorithm == "pso":
@@ -63,6 +65,15 @@ class ModAlgoAllModels:
                              time=self.time,
                              objective_function_type=model
                             )
+                out = to_model(signal=self.signal, time=self.time, model=model, params=params)
+                self.outputs[model] = out
+
+        if self.algorithm == "spider monkey":
+            for model in self.models:
+                print("Running " + model + " model")
+                params = MSO(signal=self.signal,
+                             time=self.time,
+                             objective_function_type=model).solve(100)
                 out = to_model(signal=self.signal, time=self.time, model=model, params=params)
                 self.outputs[model] = out
 
