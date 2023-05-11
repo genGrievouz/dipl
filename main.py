@@ -30,7 +30,7 @@ def run_all():
     # param_ranges = [(21000, 23000), (40, 50), (0.7, 1)]
     # param_ranges = [(0.1, 1000), (0.1, 100), (0.1, 10)]
 
-    ModAlgoAllModels(name, signal, time, "ant")
+    ModAlgoAllModels(name, signal, time, "abc")
     # get_params_cuckoo_v2()
     # get_params_for_cuckoo()
     # run_function()
