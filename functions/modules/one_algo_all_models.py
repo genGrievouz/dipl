@@ -3,7 +3,7 @@ from dipl.data.visualize import plot_result
 from dipl.evolutionary.ant_colony import ant_colony_optimization
 from dipl.evolutionary.pso import pso_algorithm
 from dipl.evolutionary.atrificial_bee_colony import abc
-from dipl.evolutionary.cuckoo_search_v2 import cuckoo_search
+from dipl.evolutionary.cuckoo_search import cuckoo_search
 from dipl.evolutionary.firefly_algorithm import firefly_algorithm
 
 

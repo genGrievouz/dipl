@@ -1,8 +1,9 @@
 from dipl.data.search_space import to_model
+from dipl.data.statistics import calculate_r2, calculate_spearman, calculate_nrmse
 from dipl.evolutionary.MSO import MSO
 from dipl.evolutionary.ant_colony import ant_colony_optimization
 from dipl.evolutionary.atrificial_bee_colony import abc
-from dipl.evolutionary.cuckoo_search_v2 import cuckoo_search
+from dipl.evolutionary.cuckoo_search import cuckoo_search
 import matplotlib.pyplot as plt
 
 from dipl.evolutionary.firefly_algorithm import firefly_algorithm
@@ -16,15 +17,18 @@ class ModAlgoAllModels:
     algorithm: str
     outputs: dict = {}
     models: list = ["gamma", "ldrw", "fpt", "lagged"]
+    r_2: dict = {}
+    spearman: dict = {}
+    nrmse: dict = {}
 
     def run(self):
         if self.algorithm == "cuckoo search":
             for model in self.models:
                 print("Running " + model + " model")
                 params = cuckoo_search(signal=self.signal,
-                                    time=self.time,
-                                    objective_function_type=model
-                                    )
+                                       time=self.time,
+                                       objective_function_type=model
+                                       )
                 out = to_model(signal=self.signal, time=self.time, model=model, params=params)
                 self.outputs[model] = out
 
@@ -64,7 +68,7 @@ class ModAlgoAllModels:
                 params = abc(signal=self.signal,
                              time=self.time,
                              objective_function_type=model
-                            )
+                             )
                 out = to_model(signal=self.signal, time=self.time, model=model, params=params)
                 self.outputs[model] = out
 
@@ -76,6 +80,32 @@ class ModAlgoAllModels:
                              objective_function_type=model).solve(100)
                 out = to_model(signal=self.signal, time=self.time, model=model, params=params)
                 self.outputs[model] = out
+
+    def calc_r2(self):
+        r2 = {}
+        for model, fit in self.outputs.items():
+            r2[model] = calculate_r2(self.signal, fit)
+        self.r_2 = r2
+        return r2
+
+    def calc_spermans(self):
+        spermans = {}
+        for model, fit in self.outputs.items():
+            spermans[model] = calculate_spearman(self.signal, fit)
+        self.spearman = spermans
+        return spermans
+
+    def calc_nrmse(self):
+        nrmse = {}
+        for model, fit in self.outputs.items():
+            nrmse[model] = calculate_nrmse(self.signal, fit)
+        self.nrmse = nrmse
+        return nrmse
+
+    def show_statistics(self):
+        print("R2: ", self.calc_r2())
+        print("Spearman: ", self.calc_spermans())
+        print("NRMSE: ", self.calc_nrmse())
 
     def plot(self):
         plt.figure()
@@ -94,4 +124,6 @@ class ModAlgoAllModels:
         self.time = time
         self.algorithm = algorithm
         self.run()
-        self.plot()
+        # self.plot()
+        # self.show_statistics()
+

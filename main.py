@@ -6,7 +6,7 @@ from dipl.modules.ModuleModelData2 import ModuleModelData2
 from dipl.data.visualize import plot_result_algos
 from dipl.evolutionary.ant_colony import ant_colony_optimization
 from dipl.evolutionary.atrificial_bee_colony import abc
-from dipl.evolutionary.cuckoo_search_v2 import cuckoo_search
+from dipl.evolutionary.cuckoo_search import cuckoo_search
 from dipl.data.load_data import dataset_2_load_file_n
 from dipl.evolutionary.firefly_algorithm import firefly_algorithm
 from dipl.functions.gamma import gamma_model
@@ -30,7 +30,7 @@ def run_all():
     # param_ranges = [(21000, 23000), (40, 50), (0.7, 1)]
     # param_ranges = [(0.1, 1000), (0.1, 100), (0.1, 10)]
 
-    ModAlgoAllModels(name, signal, time, "cuckoo search")
+    ModAlgoAllModels(name, signal, time, "abc")
     # get_params_cuckoo_v2()
     # get_params_for_cuckoo()
     # run_function()
