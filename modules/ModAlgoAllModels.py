@@ -1,3 +1,4 @@
+from dipl.conf import DIR
 from dipl.data.search_space import to_model
 from dipl.data.statistics import calculate_r2, calculate_spearman, calculate_nrmse
 from dipl.evolutionary.MSO import MSO
@@ -103,9 +104,9 @@ class ModAlgoAllModels:
         return nrmse
 
     def show_statistics(self):
-        print("R2: ", self.calc_r2())
-        print("Spearman: ", self.calc_spermans())
-        print("NRMSE: ", self.calc_nrmse())
+        print("R2: ", self.r_2)
+        print("Spearman: ", self.spearman)
+        print("NRMSE: ", self.nrmse)
 
     def plot(self):
         plt.figure()
@@ -117,6 +118,9 @@ class ModAlgoAllModels:
         plt.ylabel('Intensity')
         plt.xlabel('Time [s]')
         plt.show()
+        plt.savefig(DIR + '\\data\\images\\' + self.algorithm + "_"
+                    + self.title.replace(".mat", "")
+                    + '.png')
 
     def __init__(self, title, signal, time, algorithm):
         self.title = title + " " + algorithm
@@ -124,6 +128,8 @@ class ModAlgoAllModels:
         self.time = time
         self.algorithm = algorithm
         self.run()
-        # self.plot()
+        self.r_2 = self.calc_r2()
+        self.spearman = self.calc_spermans()
+        self.nrmse = self.calc_nrmse()
+        self.plot()
         # self.show_statistics()
-

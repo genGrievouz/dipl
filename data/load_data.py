@@ -30,9 +30,9 @@ def dataset_1_load_file_n(name):
     data = pymatreader.read_mat(data_path + "\\" + name)
     x = data['tissue'][0]
     ts = data['info']['acq']["Ts"]
-    time = data['time'][0]
+    time = np.linspace(0, 0 + (ts * len(x)), len(x), endpoint=False)
     x = remove_negative_values(preprocessing(x))
-    threshold = 0.03
+    threshold = min(x) + 0.1
     removed_indices = [index for index in range(len(x)) if x[index] < threshold]
     x = [i for i in x if i > threshold]
     time = [time[i] for i in range(len(time)) if i not in removed_indices]

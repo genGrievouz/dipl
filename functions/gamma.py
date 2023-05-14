@@ -4,8 +4,6 @@ from scipy.special import gamma
 
 
 def gamma_model(signal, auc, beta, alpha):
-    print(auc, beta, alpha)
-    print(type(auc), type(beta), type(alpha))
     return [np.divide((auc * (x ** alpha) * np.exp(-1 * np.divide(x, beta))), (beta ** (alpha + 1) * gamma(alpha + 1))) for x in
             signal]
 

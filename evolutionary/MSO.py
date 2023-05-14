@@ -79,8 +79,5 @@ class MSO:
                 best_monkey = monkeys[0]
                 best_fitness = monkey_fitness[0]
 
-            # Print progress
-            print(f"Iteration {i + 1}/{max_iter}: Best fitness = {best_fitness}")
-
         return best_monkey
         # return best_monkey, best_fitness
