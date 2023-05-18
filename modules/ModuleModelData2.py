@@ -44,7 +44,6 @@ class ModuleModelData2:
 
         lognorm = LOGNORM(x, time)
         fit_lognormal = lognorm.fit
-        print(fit_lognormal)
 
         lagged = LAGG(x, time)
         fit_lagged = lagged.fit

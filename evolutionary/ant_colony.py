@@ -1,156 +1,93 @@
-# import random
-# import numpy as np
-#
-# from dipl.data.search_space import get_objective_function_and_params
-#
-#
-# def ant_colony_optimization(
-#         signal: list,
-#         time: list,
-#         objective_function_type: str,
-#         num_ants=10,
-#         num_iterations=100,
-#         evaporation_rate=0.1,
-#         alpha=1, beta=2
-# ):
-#
-#     param_range, objective_function = get_objective_function_and_params(signal,
-#                                                                         time,
-#                                                                         objective_function_type
-#                                                                         )
-#
-#     """
-#     Ant Colony Optimization algorithm for finding the optimal parameters for a given objective function.
-#
-#     Parameters:
-#     signal (list): The signal to be modeled.
-#     time (list): The time points corresponding to the signal.
-#     objective_function (function): The objective function to optimize.
-#     num_ants (int): The number of ants in the colony.
-#     num_iterations (int): The number of iterations to run the algorithm.
-#     evaporation_rate (float): The rate at which pheromone evaporates.
-#     alpha (float): The importance of the pheromone trail in choosing the next parameter.
-#     beta (float): The importance of the fitness value in choosing the next parameter.
-#
-#     Returns:
-#     best_params (dict): The best parameters found by the algorithm.
-#     """
-#
-#     num_params = len(param_range)
-#     pheromone = np.ones(num_params) / num_params
-#
-#     # Initialize the best parameters and fitness value
-#     best_params = {}
-#     best_fitness = float('-inf')
-#
-#     # Initialize the colony of ants
-#     ants = []
-#     for i in range(num_ants):
-#         ant_params = {}
-#         for j in range(num_params):
-#             param_min, param_max = param_range[j]
-#             ant_params[j] = random.uniform(param_min, param_max)
-#         ants.append(ant_params)
-#
-#     # Run the algorithm for the specified number of iterations
-#     for i in range(num_iterations):
-#         fitness_values = []
-#         for ant_params in ants:
-#             fitness = objective_function(ant_params, signal)
-#             fitness_values.append(fitness)
-#
-#             # Update the best parameters and fitness value
-#             if fitness > best_fitness:
-#                 best_params = ant_params
-#                 best_fitness = fitness
-#
-#         # Update the pheromone trail
-#         pheromone *= (1 - evaporation_rate)
-#         for ant_params, fitness in zip(ants, fitness_values):
-#             for j in range(num_params):
-#                 param_value = ant_params[j]
-#                 pheromone[j] += evaporation_rate * fitness / objective_function(ant_params, signal) * (
-#                                         param_value == best_params[j])
-#
-#         # Choose the next set of candidate parameters
-#         for ant_params in ants:
-#             candidate_params = {}
-#             for j in range(num_params):
-#                 param_min, param_max = param_range[j]
-#                 param_min = int(param_min)
-#                 param_max = int(param_max)
-#                 param_probs = np.zeros(param_max - param_min + 1)
-#                 for k in range(param_min, param_max + 1):
-#                     param_probs[k - param_min] = pheromone[j] ** alpha * (1 / abs(ant_params[j] - k)) ** beta
-#                 param_probs_sum = param_probs.sum()
-#                 candidate_params[str(j)] = np.random.choice(np.arange(param_min, param_max + 1),
-#                                                             p=param_probs / param_probs_sum)
-#             ant_params.update(candidate_params)
-
-
-import numpy as np
-from scipy.optimize import minimize
-
 from dipl.data.search_space import get_objective_function_and_params
+import numpy as np
 
 
-# Define the ant colony algorithm
-def ant_colony_optimization(signal,
-                         time,
-                         objective_function_type,
-                         n_ants=50,
-                         n_iterations=100,
-                         alpha=1,
-                         beta=1,
-                         evaporation_rate=0.5,
-                         Q=100,
-                         max_tau=2
-                         ):
+def ant_colony_optimization(
+        signal,
+        time,
+        objective_function_type,
+):
 
-    # Define the objective function and parameter ranges
-    param_ranges, objective_function = get_objective_function_and_params(signal, time, objective_function_type)
+    global gamma_values, gamma_probabilities, gamma_index, best_gamma
+    params_range, objective_function = get_objective_function_and_params(signal, time, objective_function_type)
 
-    # Define the size
-    size = len(param_ranges)
+    # ACO parameters
+    n_ants = 20
+    n_iterations = 100
+    decay = 0.1
+    alpha = 1
+    beta = 2
 
-    # Initialize the pheromone trail
-    tau = np.ones((size, len(signal))) * max_tau
+    n_params = len(params_range)
+    # Parameter discretization
+    auc_values = np.linspace(params_range[0][0], params_range[0][1], n_ants)
+    beta_values = np.linspace(params_range[1][0], params_range[1][1], n_ants)
+    alpha_values = np.linspace(params_range[2][0], params_range[2][1], n_ants)
+    if n_params == 4:
+        gamma_values = np.linspace(params_range[3][0], params_range[3][1], n_ants)
 
-    # Initialize the best solution and its objective function value
-    best_solution = None
-    best_value = np.inf
+    # Pheromone maps
+    pheromone_auc = np.ones(n_ants)
+    pheromone_beta = np.ones(n_ants)
+    pheromone_alpha = np.ones(n_ants)
+    pheromone_gamma = np.ones(n_ants)
 
-    # Start the iterations
-    for iteration in range(n_iterations):
-        # Initialize the ants' solutions and their objective function values
-        solutions = np.zeros((n_ants, 3))
-        values = np.zeros(n_ants)
+    # ACO main loop
+    for i in range(n_iterations):
+        # Initialize new generation of ants
+        new_auc_values = np.zeros(n_ants)
+        new_beta_values = np.zeros(n_ants)
+        new_alpha_values = np.zeros(n_ants)
+        new_gamma_values = np.zeros(n_ants)
 
-        # Move the ants
+
         for ant in range(n_ants):
-            # Choose the next parameter using the pheromone trail and the heuristic information
-            probs = (tau[:, :, np.newaxis] ** alpha) * ((1 / (values[:, np.newaxis] + 1e-10)) ** beta)
-            probs /= np.sum(probs, axis=0)
-            # param_indices = np.argmax(np.random.multinomial(1, probs[:, :, 0].T), axis=1)
-            # params = np.array(
-            #     [auc_choices[param_indices[0]], mean_choices[param_indices[1]], std_choices[param_indices[2]]])
-            params = param_ranges[np.random.choice(np.arange(0, size), p=probs[:, :, 0].T)]
-            solutions[ant, :] = params
+            # Transition rule
+            auc_probabilities = (pheromone_auc ** alpha) * ((1.0 / auc_values) ** beta)
+            auc_probabilities = auc_probabilities / auc_probabilities.sum()
+            beta_probabilities = (pheromone_beta ** alpha) * ((1.0 / beta_values) ** beta)
+            beta_probabilities = beta_probabilities / beta_probabilities.sum()
+            alpha_probabilities = (pheromone_alpha ** alpha) * ((1.0 / alpha_values) ** beta)
+            alpha_probabilities = alpha_probabilities / alpha_probabilities.sum()
+            if n_params == 4:
+                gamma_probabilities = (pheromone_alpha ** alpha) * ((1.0 / gamma_values) ** beta)
+                gamma_probabilities = gamma_probabilities / gamma_probabilities.sum()
 
-            # Calculate the objective function value of the solution
-            values[ant] = objective_function(params, signal)
+            # Assign new values
+            new_auc_values[ant] = np.random.choice(auc_values, p=auc_probabilities)
+            new_beta_values[ant] = np.random.choice(beta_values, p=beta_probabilities)
+            new_alpha_values[ant] = np.random.choice(alpha_values, p=alpha_probabilities)
+            if n_params == 4:
+                new_gamma_values[ant] = np.random.choice(gamma_values, p=gamma_probabilities)
 
-        # Update the pheromone trail
-        delta_tau = np.zeros((3, signal.shape[0]))
+        # Update pheromones
         for ant in range(n_ants):
-            for param_index, param_value in enumerate(solutions[ant, :]):
-                delta_tau[param_index, int(param_value)] += Q / values[ant]
-        tau = (1 - evaporation_rate) * tau + delta_tau
+            auc_index = np.where(auc_values == new_auc_values[ant])[0][0]
+            beta_index = np.where(beta_values == new_beta_values[ant])[0][0]
+            alpha_index = np.where(alpha_values == new_alpha_values[ant])[0][0]
+            if n_params == 4:
+                gamma_index = np.where(gamma_values == new_gamma_values[ant])[0][0]
+                fitness = np.mean(
+                    objective_function(
+                        (new_auc_values[ant], new_beta_values[ant], new_alpha_values[ant], new_gamma_values[ant]),
+                        signal))
+            if n_params == 3:
+                fitness = np.mean(
+                    objective_function((new_auc_values[ant], new_beta_values[ant], new_alpha_values[ant]), signal))
+            pheromone_auc[auc_index] = (1 - decay) * pheromone_auc[auc_index] + decay * fitness
+            pheromone_beta[beta_index] = (1 - decay) * pheromone_beta[beta_index] + decay * fitness
+            pheromone_alpha[alpha_index] = (1 - decay) * pheromone_alpha[alpha_index] + decay * fitness
+            if n_params == 4:
+                pheromone_gamma[gamma_index] = (1 - decay) * pheromone_gamma[gamma_index] + decay * fitness
 
-        # Update the best solution and its objective function value
-        current_best_index = np.argmin(values)
-        if values[current_best_index] < best_value:
-            best_solution = solutions[current_best_index, :]
-            best_value = values[current_best_index]
+    # Final result
+    best_auc = auc_values[pheromone_auc.argmax()]
+    best_beta = beta_values[pheromone_beta.argmax()]
+    best_alpha = alpha_values[pheromone_alpha.argmax()]
+    if n_params == 4:
+        best_gamma = gamma_values[pheromone_gamma.argmax()]
 
-    return best_solution, best_value
+    if n_params == 4:
+        return best_auc, best_beta, best_alpha, best_gamma
+
+    return best_auc, best_beta, best_alpha

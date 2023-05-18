@@ -40,6 +40,7 @@ def objective_function_ldrw(params, signal):
 def to_model(signal, time, model, params):
     if model == "gamma":
         gamma = GAMMA(signal, time, params[0], params[1], params[2])
+        print(gamma.fit)
         return gamma.fit
     if model == "fpt":
         ftp = FPT(signal, time, params[0], params[1], params[2])

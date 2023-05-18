@@ -10,7 +10,7 @@ def cuckoo_search(signal: list,
 
     param_ranges, objective_function = get_objective_function_and_params(signal, time, objective_function_type)
 
-    n_nests = 25
+    n_nests = 20
     n_iterations = 100
     pa = 1.0
     dimension = len(param_ranges)

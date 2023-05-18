@@ -17,7 +17,7 @@ class ModAlgoAllModels:
     time: list
     algorithm: str
     outputs: dict = {}
-    models: list = ["gamma", "ldrw", "fpt", "lagged"]
+    models: list = ["lognormal", "gamma", "ldrw", "fpt", "lagged"]
     r_2: dict = {}
     spearman: dict = {}
     nrmse: dict = {}
@@ -128,8 +128,8 @@ class ModAlgoAllModels:
         self.time = time
         self.algorithm = algorithm
         self.run()
-        self.r_2 = self.calc_r2()
-        self.spearman = self.calc_spermans()
-        self.nrmse = self.calc_nrmse()
+        # self.r_2 = self.calc_r2()
+        # self.spearman = self.calc_spermans()
+        # self.nrmse = self.calc_nrmse()
         self.plot()
         # self.show_statistics()

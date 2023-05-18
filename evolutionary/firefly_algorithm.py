@@ -7,7 +7,7 @@ from dipl.data.search_space import get_objective_function_and_params
 def firefly_algorithm(signal,
                       time,
                       objective_function_type,
-                      num_fireflies=10,
+                      num_fireflies=30,
                       max_iterations=100,
                       alpha=0.5,
                       beta=0.5,

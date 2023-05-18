@@ -18,7 +18,7 @@ def abc(signal: list,
     """
     param_ranges, objective_function = get_objective_function_and_params(signal, time, objective_function_type)
 
-    n_bees = 15
+    n_bees = 30
     max_iter = 100
     max_trials = 10
     n_dim = len(param_ranges)

@@ -5,6 +5,11 @@ from pymatreader import pymatreader
 
 from dipl.functions.load_data import preprocessing, remove_negative_values
 
+def moving_average(signal, window_size):
+    weights = np.repeat(1.0, window_size) / window_size
+    smoothed_signal = np.convolve(signal, weights, mode='valid')
+    return smoothed_signal
+
 
 def dataset_2_load_file_n(name):
     data_path = os.getcwd() + '\data\dataset_2'
@@ -18,10 +23,14 @@ def dataset_2_load_file_n(name):
         signal.append(dataset[i][int(y)][int(x)])
 
     x = signal
-    # min_x = min(x) + 1
+    # min_x = min(x) - 0.1
     # x = [i - min_x for i in x]
     time = data['info']["acq"]['TimeStamps']
     ts = data['info']['acq']["Ts"]
+    # x = moving_average(x, 5)
+    # print(len(x))
+    # print(len(time[:-4]))
+    # time = time[:-4]
     return x, time, ts
 
 
