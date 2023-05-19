@@ -4,5 +4,4 @@ matplotlib
 paramnormal
 pymatreader
 scikit-learn
-paramnormal
 pyswarm
