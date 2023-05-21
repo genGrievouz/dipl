@@ -55,8 +55,8 @@ def to_model(signal, time, model, params):
         ldrw = LDRW(signal, time, params[0], params[1], params[2])
         return ldrw.fit
 
-def get_objective_function_and_params(signal, time, objective_function_type):
 
+def get_objective_function_and_params(signal, time, objective_function_type):
     global objective_function, param_ranges
 
     if objective_function_type == "gamma":

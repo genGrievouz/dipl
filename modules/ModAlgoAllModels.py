@@ -1,3 +1,5 @@
+from scipy.signal import savgol_filter
+
 from dipl.conf import DIR
 from dipl.data.search_space import to_model
 from dipl.data.statistics import calculate_r2, calculate_spearman, calculate_nrmse
@@ -7,7 +9,9 @@ from dipl.evolutionary.atrificial_bee_colony import abc
 from dipl.evolutionary.cuckoo_search import cuckoo_search
 import matplotlib.pyplot as plt
 
+from dipl.evolutionary.de import de_algorithm
 from dipl.evolutionary.firefly_algorithm import firefly_algorithm
+from dipl.evolutionary.ga import ga_algorithm
 from dipl.evolutionary.pso import pso_algorithm
 
 
@@ -23,15 +27,8 @@ class ModAlgoAllModels:
     nrmse: dict = {}
 
     def run(self):
-        if self.algorithm == "cuckoo search":
-            for model in self.models:
-                print("Running " + model + " model")
-                params = cuckoo_search(signal=self.signal,
-                                       time=self.time,
-                                       objective_function_type=model
-                                       )
-                out = to_model(signal=self.signal, time=self.time, model=model, params=params)
-                self.outputs[model] = out
+
+        # Library of models
 
         if self.algorithm == "pso":
             for model in self.models:
@@ -43,6 +40,28 @@ class ModAlgoAllModels:
                 out = to_model(signal=self.signal, time=self.time, model=model, params=params)
                 self.outputs[model] = out
 
+        if self.algorithm == "de":
+            for model in self.models:
+                print("Running " + model + " model")
+                params = de_algorithm(signal=self.signal,
+                                      time=self.time,
+                                      objective_function_type=model
+                                      )
+                out = to_model(signal=self.signal, time=self.time, model=model, params=params)
+                self.outputs[model] = out
+
+        if self.algorithm == "ga":
+            for model in self.models:
+                print("Running " + model + " model")
+                params = ga_algorithm(signal=self.signal,
+                                      time=self.time,
+                                      objective_function_type=model
+                                      )
+                out = to_model(signal=self.signal, time=self.time, model=model, params=params)
+                self.outputs[model] = out
+
+        # Own Evolutionary algorithms
+
         if self.algorithm == "ant":
             for model in self.models:
                 print("Running " + model + " model")
@@ -50,6 +69,16 @@ class ModAlgoAllModels:
                                                  time=self.time,
                                                  objective_function_type=model
                                                  )
+                out = to_model(signal=self.signal, time=self.time, model=model, params=params)
+                self.outputs[model] = out
+
+        if self.algorithm == "cuckoo search":
+            for model in self.models:
+                print("Running " + model + " model")
+                params = cuckoo_search(signal=self.signal,
+                                       time=self.time,
+                                       objective_function_type=model
+                                       )
                 out = to_model(signal=self.signal, time=self.time, model=model, params=params)
                 self.outputs[model] = out
 
@@ -128,8 +157,7 @@ class ModAlgoAllModels:
         self.time = time
         self.algorithm = algorithm
         self.run()
-        # self.r_2 = self.calc_r2()
-        # self.spearman = self.calc_spermans()
-        # self.nrmse = self.calc_nrmse()
+        self.r_2 = self.calc_r2()
+        self.spearman = self.calc_spermans()
+        self.nrmse = self.calc_nrmse()
         self.plot()
-        # self.show_statistics()

@@ -1,4 +1,7 @@
+from scipy.signal import savgol_filter
+
 from dipl.functions.lagnorm import LAGG
+from dipl.functions.load_data import preprocessing, remove_negative_values
 from dipl.functions.lognorm import LOGNORM
 from dipl.functions.fpt import FPT
 from dipl.functions.gamma import GAMMA
@@ -31,7 +34,7 @@ class ModuleModelData2:
         threshold = min(x) + 0.1
         x = [i - threshold for i in x]
         time = data['info']["acq"]['TimeStamps']
-        # ts = data['info']['acq']["Ts"]
+
 
         ldrw = LDRW(x, time)
         fit_ldrw = ldrw.fit
