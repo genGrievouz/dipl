@@ -19,6 +19,7 @@ def ant_colony_optimization(
     beta = 2
 
     n_params = len(params_range)
+
     # Parameter discretization
     auc_values = np.linspace(params_range[0][0], params_range[0][1], n_ants)
     beta_values = np.linspace(params_range[1][0], params_range[1][1], n_ants)

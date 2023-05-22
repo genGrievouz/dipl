@@ -10,30 +10,43 @@ from dipl.data.load_data import dataset_2_load_file_n, dataset_1_load_file_n
 from dipl.evolutionary.firefly_algorithm import firefly_algorithm
 from dipl.functions.gamma import gamma_model
 
-
-# from evolutionary.cuckoo_search_v3 import run
-
 def run_all():
 
+    """
+    For visualizing a datasets
+    ModuleModelData1() - dataset 1
+    ModuleModelData2() - dataset 2
+    """
     # ModuleModelData1()
     # ModuleModelData2()
 
+
+    """
+    Example of loaing and displaying all models for
+    a one signal from dataset 2
+    You can chose between library algorithms:
+    "pso", "de"
+    or:
+    "ant", "cuckoo search", 
+    "fir", "abc", "spider monkey"  
+    """
     # name = "per02_2_4_trig_DR60_inp_con_mreg_121113.mat"
     # signal, time, ts = dataset_2_load_file_n(name)
-    #
     # ModAlgoAllModels(name, signal, time, "de")
-    #
-    # # ModuleModelData2()
-    #
+
+
+    """
+    Example of loading and displaying all models for dataset 1
+    """
+    # name = "exp13_aifnova_inp_tis_111017.mat"
     # signal, time, ts = dataset_1_load_file_n(name)
-    #
     # ModAlgoAllModels(name, signal, time, "ant")
 
 
-    # AUC, BETA, ALPHA
-    # param_ranges = [(21000, 23000), (40, 50), (0.7, 1)]
-    # param_ranges = [(0.1, 1000), (0.1, 100), (0.1, 10)]
-
+    """
+    Example of loading and displaying all models for dataset 1 or 2
+    At the end it will prints r2, spearman and nrmse for all files
+    """
     r_2 = []
     spearman = []
     nrmse = []
@@ -105,8 +118,6 @@ def run_all():
     get_r2()
     get_spearman()
     ger_nrmse()
-
-    # ModuleDoAll("1")
 
 
 if __name__ == '__main__':
